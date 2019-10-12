@@ -4,14 +4,19 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build hello world",
+            "label": "build uop",
             "type": "shell",
-            "command": "g++",
-            "args": ["-g", "-o", "UOP_Test", "UOP_Test.cpp"],
+            "command": "g++ -std=c++0x",
+            "args": [
+                "-g",
+                "-o",
+                "UOP_Test",
+                "UOP_Test.cpp"
+            ],
             "group": {
-            "kind": "build",
-            "isDefault": true
-      }
-    }
+                "kind": "build",
+                "isDefault": true
+            }
+        }
     ]
 }
