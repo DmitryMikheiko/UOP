@@ -10,8 +10,8 @@ void BufferedAdapter::AllocBuffer(BufferType *buffer,int size){
         buffer->size_max = size;
     }
     else{
-            buffer->buffer = new byte[size];
-            buffer->size_max = size;
+        buffer->buffer = new byte[size];
+        buffer->size_max = size;
     }
 }
 void BufferedAdapter::AllocBuffers(int in_size, int out_size){
@@ -54,6 +54,10 @@ BufferedAdapter::BufferedAdapter(StreamWriteFunc sw, StreamOutEmptyFunc soe){
     DefaultInit(); 
     StreamWrite = sw;
     StreamOutEmpty = soe;
+}
+BufferedAdapter::~BufferedAdapter(){
+    if(input.buffer != NULL) delete [] input.buffer;
+    //cout<<"BufferedAdapter "<<id<<" deleted"<<endl;
 }
 bool BufferedAdapter::IncomeBufferIsFull(){
     return input.size == input.size_max;
@@ -125,6 +129,7 @@ void BufferedAdapter::TxCompleteDisable(){
     TxEmpty = true;
 }
 bool BufferedAdapter::WritePacket(byte *buffer,int size){
+    if(StreamWrite == NULL) return false;
     int time_s = GetTime_ms();
     int packet_size;
     int transmitted_size;
@@ -163,6 +168,12 @@ void BufferedAdapter::FlushIncomeBuffer(){
     input.size = 0;
     input.write_pos = 0;
     input.read_pos = 0;
+}
+void BufferedAdapter::SetStreamWriteFunc(StreamWriteFunc sw){
+     StreamWrite = sw;
+}
+void BufferedAdapter::SetStreamOutEmptyFunc(StreamOutEmptyFunc soe){
+    StreamOutEmpty = soe;
 }
 void BufferedAdapter::PacketModeEnable(){
     PacketMode = true;

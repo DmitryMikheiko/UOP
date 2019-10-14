@@ -1,10 +1,13 @@
 #ifndef __UOP__
 #define __UOP__
 #include "BufferedAdapter.h"
+#include "UOP_Codec.cpp"
 #include <iostream>
 #include <string>
+#include <vector>
 #include <cstring>
 #include <chrono>
+#include <stdio.h>
 
 using namespace std;
 typedef chrono::high_resolution_clock Time;
@@ -12,6 +15,7 @@ typedef chrono::milliseconds ms;
 chrono::high_resolution_clock::time_point InitialTime;
 
 #define byte unsigned char
+#define UOP_AdaptersList_Max_Size 50
 
 long long GetTime_ms()
 {
@@ -22,31 +26,26 @@ void delay_ms(int delay){
     long long tn = GetTime_ms();
     while (GetTime_ms()-tn < delay);
 }
-typedef enum UOP_Header_Type{
-        TypeA,TypeB,TypeC,TypeD
-    }UOP_Header_Type;
-struct UOP_Header{
-    UOP_Header_Type type;
-    uint8_t flags;
-    uint8_t cmd;
-    uint32_t src;
-    uint32_t dsc;
-    uint32_t sn;
-    uint16_t check;
-    uint16_t data_size;
-    uint8_t *data;
-};
+
 class UOP
 {
 private:
     static const string version ;
-    /* data */
+    vector<BufferedAdapter*> AdaptersVector;
+    vector<BufferedAdapter*>::iterator GetAdapterIterator(BufferedAdapter *adapter);
+    UOP_Codec codec;
 public:
-    UOP(/* args */);
+    UOP();
     ~UOP();
 
-    
+    bool AddAdapter(BufferedAdapter *adapter);
+    BufferedAdapter* AddNewAdapter();  
+    bool RemoveAdapter(BufferedAdapter *adapter);
     string GetVersion();
+
+private:
+
+    int GetAdapterIndex(BufferedAdapter *adapter);
 
 };
 const string UOP::version = "3.0";

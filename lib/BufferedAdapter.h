@@ -11,7 +11,15 @@
 #define OutcomePacketDelay_Default 0
 #define IncomePacketDelay_Default 5
 #define byte unsigned char
-
+struct BufferType{
+    
+        bool lock;
+        byte *buffer;
+        int size_max;
+        int size;
+        int read_pos;
+        int write_pos;
+};
 class BufferedAdapter
 {
 private:
@@ -25,14 +33,6 @@ private:
     bool TxEmpty;
     bool TxCompleteUse;
     bool PacketMode;
-    struct BufferType{
-        bool lock;
-        byte *buffer;
-        int size_max;
-        int size;
-        int read_pos;
-        int write_pos;
-    };
     BufferType input;
 public:
     typedef int (*StreamWriteFunc)(byte *buffer,int size);
@@ -54,6 +54,7 @@ public:
     BufferedAdapter();
     BufferedAdapter(StreamWriteFunc sw);
     BufferedAdapter(StreamWriteFunc sw, StreamOutEmptyFunc soe);
+    ~BufferedAdapter();
     // Stream-side methods:
     bool Write(byte b);
     int  Write(byte *buffer,int size);
@@ -69,6 +70,8 @@ public:
     int  ReadPacket(byte *buffer,int maxsize);
     void FlushIncomeBuffer();
     // Settings:
+    void SetStreamWriteFunc(StreamWriteFunc sw);
+    void SetStreamOutEmptyFunc(StreamOutEmptyFunc soe);
     void PacketModeEnable();
     void PacketModeDisable();
     void SetMaxIncomeBufferSize(int size);

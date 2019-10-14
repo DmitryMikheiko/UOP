@@ -61,10 +61,12 @@ int main(){
     RandomInitBuffer(arr1,arrs_size);
     RandomInitBuffer(arr2,arrs_size);
     
-    BufferedAdapter b1;
-    BufferedAdapter b2;
-    cout<<"id1: "<<b1.GetID()<<endl;
-    cout<<"id2: "<<b2.GetID()<<endl;
+    uop.AddAdapter(&bufferedAdapter);
+
+    
+
+    cout<<"exit"<<endl;
+    uop.~UOP();
     cin.get();
     return 0;
 }
