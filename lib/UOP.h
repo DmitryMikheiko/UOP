@@ -1,7 +1,9 @@
 #ifndef __UOP__
 #define __UOP__
-#include "BufferedAdapter.h"
+#include "UOP_Adapter.h"
 #include "UOP_Codec.cpp"
+#include "UOP_CommonTypes.h"
+#include "UOP_Interaction.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -17,6 +19,7 @@ chrono::high_resolution_clock::time_point InitialTime;
 #define byte unsigned char
 #define UOP_AdaptersList_Max_Size 50
 
+
 long long GetTime_ms()
 {
     auto timeNow = Time::now();
@@ -31,21 +34,23 @@ class UOP
 {
 private:
     static const string version ;
-    vector<BufferedAdapter*> AdaptersVector;
-    vector<BufferedAdapter*>::iterator GetAdapterIterator(BufferedAdapter *adapter);
+    vector<UOP_Adapter*> AdaptersVector;
+    vector<UOP_Adapter*>::iterator GetAdapterIterator(UOP_Adapter *adapter);
     UOP_Codec codec;
 public:
     UOP();
     ~UOP();
+    bool AddAdapter(UOP_Adapter *adapter);
+    UOP_Adapter* AddNewAdapter();  
+    bool RemoveAdapter(UOP_Adapter *adapter);
+    void Core();
 
-    bool AddAdapter(BufferedAdapter *adapter);
-    BufferedAdapter* AddNewAdapter();  
-    bool RemoveAdapter(BufferedAdapter *adapter);
+
     string GetVersion();
 
 private:
 
-    int GetAdapterIndex(BufferedAdapter *adapter);
+    int GetAdapterIndex(UOP_Adapter *adapter);
 
 };
 const string UOP::version = "3.0";

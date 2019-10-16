@@ -2,25 +2,52 @@
  * @brief This class designed for UOP protol. Allows you to connect any type of data stream to UOP Core.
  * Oct.12,2019
  */
-#ifndef _BufferedAdapter_
-#define _BufferedAdapter_
+#ifndef _UOP_Adapter_
+#define _UOP_Adapter_
 #include "UOP.h"
-#define TimeoutDelay_Default 1000
+#include "UOP_Buffer.h"
+#include "UOP_CommonTypes.h"
+
+
+#define TimeoutDelay_Default 50
 #define MaxBufferSize_Default 11
-#define MaxPacketSize_Default 20
-#define OutcomePacketDelay_Default 0
+#define MaxPacketSize_Default 10
+#define OutcomePacketDelay_Default 5
 #define IncomePacketDelay_Default 5
 #define byte unsigned char
-struct BufferType{
-    
-        bool lock;
-        byte *buffer;
-        int size_max;
-        int size;
-        int read_pos;
-        int write_pos;
+struct BufferType{   
+    bool lock;
+    byte *buffer;
+    int size_max;
+    int size;
+    int read_pos;
+    int write_pos;
+    long long LastIncomeTime;
+    long long LastOutcomeTime;
+    BufferType(){
+        lock = false;
+        buffer = NULL;
+        size_max = 0;
+        size = 0;
+        read_pos = 0;
+        write_pos = 0;
+        LastIncomeTime = 0;
+        LastOutcomeTime = 0;
+    }
+    void Write(byte *data, int size){
+        if(this->size_max > 0 && buffer != NULL) delete [] buffer;
+        buffer = new byte[size];
+        size_max = size;
+        this->size = size;
+        memcpy(buffer,data,size);
+        write_pos = 0;
+        read_pos = 0;
+        LastOutcomeTime = 0;
+        LastIncomeTime = 0;
+    }
 };
-class BufferedAdapter
+
+class UOP_Adapter
 {
 private:
     static unsigned int id_counter;
@@ -29,11 +56,14 @@ private:
     int IncomePacketDelay;
     int OutcomePacketDelay;
     int TimeoutDelay;
-    long long LastIncomeTime;
     bool TxEmpty;
     bool TxCompleteUse;
     bool PacketMode;
+    bool StreamWriteRunning;
+    bool OutcomePacketDelayWait;
+    bool WriteStreamWait;
     BufferType input;
+    BufferType output;
 public:
     typedef int (*StreamWriteFunc)(byte *buffer,int size);
     typedef bool (*StreamOutEmptyFunc)();
@@ -49,12 +79,13 @@ private:
     void AllocBuffer(BufferType *buffer,int size);
     void AllocBuffers(int in_size, int out_size);
     void AllocBuffersDefault();
+    UOP_StateType WritePacketAsync();
 public:
     void DefaultInit();
-    BufferedAdapter();
-    BufferedAdapter(StreamWriteFunc sw);
-    BufferedAdapter(StreamWriteFunc sw, StreamOutEmptyFunc soe);
-    ~BufferedAdapter();
+    UOP_Adapter();
+    UOP_Adapter(StreamWriteFunc sw);
+    UOP_Adapter(StreamWriteFunc sw, StreamOutEmptyFunc soe);
+    ~UOP_Adapter();
     // Stream-side methods:
     bool Write(byte b);
     int  Write(byte *buffer,int size);
@@ -64,10 +95,11 @@ public:
     bool IncomeBufferIsFull();
     // UOP_side methods:
     //protected:
-    int  ReadAll(byte *buffer,int maxsize);
-    bool WritePacket(byte *buffer,int size);
+    int  ReadAll(byte *buffer, int maxsize);
+    int  ReadPacket(byte *buffer, int maxsize);
+    UOP_StateType WritePacket(byte *buffer, int size, bool async = false);
+    UOP_StateType WritePacketCompleteCheck();
     bool IncomePacketAvailable();
-    int  ReadPacket(byte *buffer,int maxsize);
     void FlushIncomeBuffer();
     // Settings:
     void SetStreamWriteFunc(StreamWriteFunc sw);
@@ -82,5 +114,5 @@ public:
     // ID
     unsigned int GetID();
 };
-unsigned int BufferedAdapter::id_counter = 0;
+unsigned int UOP_Adapter::id_counter = 0;
 #endif
